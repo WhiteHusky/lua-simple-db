@@ -136,4 +136,5 @@ At EOF, truncate file after the moved range.
 
 ## Possible additions
 
-* Binary tree for index, or attempt to store values sorted
+* [Binary tree for index](https://en.wikipedia.org/wiki/Binary_search_tree), or attempt to store values sorted
+   * Suggested by Kira
