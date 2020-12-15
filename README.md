@@ -96,7 +96,7 @@ Since updating records for a database of variably sized records will eventually 
 
 This logic also applies to indexes.
 
-# Example
+#### Example
 ```
 [Record 1] ==> [Record 1] ==> [Record 1] ==> [Record 1]
 [Record X]     [Record 3]     [Record 3]     [Record 3]
