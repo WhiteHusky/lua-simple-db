@@ -96,7 +96,7 @@ Since updating records for a database of variably sized records will eventually 
 
 This logic also applies to indexes.
 
-Example
+# Example
 ```
 [Record 1] ==> [Record 1] ==> [Record 1] ==> [Record 1]
 [Record X]     [Record 3]     [Record 3]     [Record 3]
@@ -105,4 +105,31 @@ Example
 [Record X]     [Record X]     [Record X]
 [Record X]     [Record X]     [Record X]
 [Record 7]     [Record 7]     [Record 7]
+```
+Since the first record is already at the beginning of the records, it will stay in place. So find the first null record, read the next valid record (3), then read until finding the next null record (after 4), deduce the range containing the valid records, and move that range down.
+```
+[Record 1]
+[Record 3]
+[Record 4]
+[Record 4]
+[Record X]
+[Record X]
+[Record 7]
+```
+Read to the next valid record (7), next invalid record (EOF, after 7), move the valid range down.
+```
+[Record 1]
+[Record 3]
+[Record 4]
+[Record 7]
+[Record X]
+[Record X]
+[Record 7]
+```
+At EOF, truncate file after the moved range.
+```
+[Record 1]
+[Record 3]
+[Record 4]
+[Record 7]
 ```
