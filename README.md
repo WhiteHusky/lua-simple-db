@@ -133,3 +133,7 @@ At EOF, truncate file after the moved range.
 [Record 4]
 [Record 7]
 ```
+
+## Possible additions
+
+* Binary tree for index, or attempt to store values sorted
