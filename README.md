@@ -32,10 +32,13 @@ xxxx1111 = reserved
 
 Describes the table so decoding method is known and columns are named appropriately in responses. A record id type **must** be first.
 
+`record-count` and `last-id` depend on `record-id-type`'s use of ushort or ulong.
+
 Table is described in the following format, then null terminated to indicate end of the definition.
 
 ```
-[col-type; record-id-type][col-type][utf8; col-name][... columns][null byte]
+[col-type; record-id-type][ushort/ulong; record-count][ushort/ulong; last-id]
+[col-type][uchar; col-name-length][utf8; col-name][... columns][null byte]
 ```
 
 **Note:** Record ID `0` is reserved for null records
@@ -126,7 +129,7 @@ Read to the next valid record (7), next invalid record (EOF, after 7), move the 
 [Record X]
 [Record 7]
 ```
-At EOF, truncate file after the moved range.
+~~At EOF, truncate file after the moved range.~~ This isn't possible in Lua without recreating the file. For now records below will be nulled and the method of how the file is truncated will be left to the higher level implementation.
 ```
 [Record 1]
 [Record 3]
