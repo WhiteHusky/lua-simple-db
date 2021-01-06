@@ -21,7 +21,6 @@ function DBHeaderPrimitive:new(columns)
     local o = {
         columns = columns,
     }
-
     setmetatable(o, self)
     self.__index = self
     return o
