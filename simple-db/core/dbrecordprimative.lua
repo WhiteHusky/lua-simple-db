@@ -4,14 +4,14 @@ local RecordFlags = require("simple-db.core.recordflags")
 local pack = string.pack
 local unpack = string.unpack
 
----@class DBRecord
+---@class DBRecordPrimitive
 ---@field readprocedure function
 ---@field recordfmt string
 ---@field columns table
 local DBRecordPrimitive = {}
 
 ---@param columns table list of lists that have a column name and associated 6.4.2 format strings
----@return DBRecord
+---@return DBRecordPrimitive
 function DBRecordPrimitive:new(columns)
     local o = {
         columns = columns,
