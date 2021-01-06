@@ -2,7 +2,7 @@
 
 Using 5.3 features, use binary files to store a data to the filesystem like a database. This will be designed as a simple implementation with little data constraints (for now).
 
-## Structure
+## Structure **OUT OF DATE**
 
 ### Column Types `col-type`
 
