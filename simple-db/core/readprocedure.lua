@@ -40,6 +40,21 @@ local function variablestringread(lenbytes)
     end
 end
 
+local function mixedprocedure(procedure)
+    ---@param handle file*
+    return function (handle)
+        local results = {}
+        local result = {}
+        for _, func in ipairs(procedure) do
+            result = {func(handle)}
+            for _, r in ipairs(result) do
+                table.insert(results, r)
+            end
+        end
+        return table.unpack(results)
+    end
+end
+
 local function fmtwitharg(fmt, start)
     local lenstart, lenend = fmt:find("%d+", start+1)
     if lenstart ~= start+1 then error("bad fmt, expected a digit following fmt but found it elsewhere or not at all") end
@@ -98,17 +113,7 @@ function ReadProcedure.fromfmt(fmt)
         return procedure[1], fixedlength
     else
         ---@param handle file*
-        return function (handle)
-            local results = {}
-            local result = {}
-            for _, func in ipairs(procedure) do
-                result = {func(handle)}
-                for _, r in ipairs(result) do
-                    table.insert(results, r)
-                end
-            end
-            return table.unpack(results)
-        end, fixedlength
+        return mixedprocedure(procedure), fixedlength
     end
 end
 
