@@ -1,5 +1,6 @@
 local DBHeaderPrimative = require("simple-db.core.dbheaderprimative")
 local DBRecordPrimative = require("simple-db.core.dbrecordprimative")
+local RecordFlags = require("simple-db.core.recordflags")
 
 local pack = string.pack
 local unpack = string.unpack
@@ -34,6 +35,7 @@ function DBTable:new(handle)
 end
 
 ---@param handle file*
+---@return DBTable
 function DBTable.fromhandle(handle)
     local dbtable = DBTable:new(handle)
     dbtable.start = handle:seek("cur")
@@ -41,6 +43,7 @@ function DBTable.fromhandle(handle)
     dbtable.header = DBHeaderPrimative.fromhandle(handle)
     dbtable.record = DBRecordPrimative.fromdbheader(dbtable.header)
     dbtable.headerlength = handle:seek("cur") - dbtable.start
+    return dbtable
 end
 
 ---@param handle file*
@@ -65,7 +68,7 @@ function DBTable:readmeta()
     local count, lastfreerecord, moverowsondelete = unpack("I4I4B", self.handle:read(9))
     self.count = count
     self.lastfreerecord = lastfreerecord
-    self.moverowsondelete = moverowsondelete
+    self.moverowsondelete = moverowsondelete == 1
 end
 
 function DBTable:writemeta()
@@ -78,8 +81,64 @@ function DBTable:writemeta()
 end
 
 function DBTable:write()
-    DBTable:writemeta()
+    self:writemeta()
     self.header:writeheader(self.handle)
+end
+
+function DBTable:insert(...)
+    if #{...} ~= #self.record.columns then
+        error("not enough columns")
+    end
+    self.handle:seek("set", self.lastfreerecord)
+    self.record:writerecord(self.handle, RecordFlags.VALID, ...)
+    self.lastfreerecord = self.handle:seek("cur")
+    self.count = self.count + 1
+    self.handle:seek("set", self.start)
+    self:writemeta()
+end
+
+--- Uses a query to find records. Returns a iterator.
+---@param query table list of columns with regex searches
+---@return function
+function DBTable:find(query)
+    if not query then query = {} end
+    local posquery = {}
+    for column, searchfunction in pairs(query) do
+        for columnmetaindex, columnmeta in ipairs(self.record.columns) do
+            if columnmeta[1] == column then
+                posquery[columnmetaindex] = searchfunction
+                break
+            end
+        end
+    end
+    query = nil
+    local nextread = self.handle:seek("set", self.headerlength + 1)
+    local outofrecords = false
+    return function ()
+        if outofrecords then return nil end
+        self.handle:seek("set", nextread)
+        local record = {}
+        local discard = false
+        while true do
+            record = self.record:readrecord(self.handle)
+            if record == nil then
+                outofrecords = true
+                return nil
+            end
+            for pos, searchfunction in pairs(posquery) do
+                if not searchfunction(record[pos]) then
+                    discard = true
+                    break
+                end
+            end
+            if not discard then
+                nextread = self.handle:seek("cur")
+                return table.unpack(record)
+            else
+                discard = false
+            end
+        end
+    end
 end
 
 return DBTable
