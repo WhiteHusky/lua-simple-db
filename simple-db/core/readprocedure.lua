@@ -7,7 +7,7 @@ local function size(fmt)
     return string.len(pack(fmt, 0))
 end
 
-local function set (list)
+local function set(list)
     local set = {}
     for _, l in ipairs(list) do set[l] = true end
     return set
