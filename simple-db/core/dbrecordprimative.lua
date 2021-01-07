@@ -39,7 +39,10 @@ end
 --- Reads a record and advances to the end of it. Else returns `nil` and advances one.
 ---@param handle file*
 function DBRecordPrimitive:readrecord(handle)
-    local meta = string.unpack("B", handle:read(1))
+    local rawmeta = handle:read(1)
+    -- Typically happens if at EOF
+    if not rawmeta then return nil end
+    local meta = string.unpack("B", rawmeta)
     if meta & RecordFlags.VALID > 0 then
         return {self.readprocedure(handle)}
     else
